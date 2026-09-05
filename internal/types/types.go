@@ -1766,6 +1766,17 @@ type WorkFilter struct {
 	// MaxRowsSource attributes which knob set MaxRows. Expected values:
 	// "--max-rows", "BEADS_MAX_ROWS", or "" (library users with no source).
 	MaxRowsSource string
+
+	// Lite mirrors IssueFilter.Lite for ready work: the heavy TEXT columns
+	// (description, design, acceptance_criteria, notes, payload, waiters) are
+	// not selected, and the returned issues carry IsLitePartial=true with those
+	// fields zero-valued. It bounds the SIZE of a row, never which rows match.
+	//
+	// Backend coverage at this base: the bare ready scan and the claim scan
+	// only. The COUNTED page (GetReadyWorkWithCounts, which backs
+	// `bd ready --json`) does not honor it -- that query has no lite projection
+	// here. Default false preserves today's behavior at every call site.
+	Lite bool
 }
 
 // StaleFilter is used to filter stale issue queries

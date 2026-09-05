@@ -36,6 +36,14 @@ var _ domain.IssueSQLRepository = (*issueSQLRepositoryImpl)(nil)
 // delegates to issueops.ScanIssueFrom, which scans it positionally.
 const issueSelectColumns = sqlbuild.IssueSelectColumns
 
+// issueSelectColumnsLite aliases the shared LITE column list; the scan side
+// delegates to issueops.ScanIssueLiteFrom, which scans it positionally and
+// sets IsLitePartial. The two constants and the two scan functions are always
+// chosen as a PAIR (see fetchIssuesByIDs): both scans are positional, so a
+// mismatched pair shifts every column after the first dropped one rather than
+// failing on the missing text.
+const issueSelectColumnsLite = issueops.IssueSelectColumnsLite
+
 var allowedUpdateFields = map[string]struct{}{
 	"status": {}, "priority": {}, "title": {}, "assignee": {},
 	"description": {}, "design": {}, "acceptance_criteria": {}, "notes": {},
@@ -676,6 +684,12 @@ type issueScanner interface {
 // that hands timestamps back as text.
 func scanIssue(s issueScanner) (*types.Issue, error) {
 	return issueops.ScanIssueFrom(s)
+}
+
+// scanIssueLite is scanIssue's lite counterpart, paired with
+// issueSelectColumnsLite.
+func scanIssueLite(s issueScanner) (*types.Issue, error) {
+	return issueops.ScanIssueLiteFrom(s)
 }
 
 func nullString(s string) any {
